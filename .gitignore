@@ -1,0 +1,9 @@
+.DS_Store
+avatars
+data
+jams
+rifffs
+users
+__pycache__
+.vscode
+.idea
