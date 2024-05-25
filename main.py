@@ -2,7 +2,8 @@ import argparse
 import sys
 from esssart.sources import pull_sources_list, seed_db
 from esssart.avatars import avatars
-from esssart.db import db
+from esssart.riff_pics import request_riffs, request_liked_riffs
+
 
 def main(argsv):
     parser = argparse.ArgumentParser(description="run command.")
@@ -28,6 +29,12 @@ def main(argsv):
 
     if args.cmd == "avatars":
         avatars(limit=args.limit, start=args.start)
+
+    if args.cmd == "riffdata":
+        request_riffs(limit=args.limit, start=args.start)
+
+    if args.cmd == "likedriffdata":
+        request_liked_riffs(limit=args.limit, start=args.start)
 
 if __name__ == "__main__":
     main(sys.argv[1:])
