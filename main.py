@@ -1,9 +1,12 @@
 import argparse
 import sys
-from esssart.sources import pull_sources_list, seed_db
-from esssart.avatars import avatars
-from esssart.riff_pics import request_riffs, request_liked_riffs
+from ptpython.repl import embed
 
+
+# from esssart.sources import pull_sources_list, seed_db
+# from esssart.avatars import avatars
+# from esssart.riff_pics import request_riffs, request_liked_riffs
+from esssart.db import db
 
 def main(argsv):
     parser = argparse.ArgumentParser(description="run command.")
@@ -35,6 +38,12 @@ def main(argsv):
 
     if args.cmd == "likedriffdata":
         request_liked_riffs(limit=args.limit, start=args.start)
+
+    if args.cmd == "seed":
+        seed_db()
+
+    if args.cmd == "cli":
+        pass
 
 if __name__ == "__main__":
     main(sys.argv[1:])
