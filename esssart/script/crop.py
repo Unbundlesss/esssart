@@ -6,6 +6,8 @@ def crop_to_square(args):
     image_path, output_path, name, url = args
     size = (800, 800)
     with Image.open(image_path) as img:
+        if img.mode == 'RGBA':
+            img = img.convert('RGB')
         ImageOps.fit(img, size).save(output_path, 'JPEG')
         print(f'resized to {output_path}')
 

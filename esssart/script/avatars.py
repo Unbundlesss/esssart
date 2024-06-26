@@ -1,8 +1,8 @@
 import requests
 import json
 import os
-from .db import db
-from .crop import crop_to_square
+from . import db
+from . import crop_to_square
 from multiprocessing import Pool
 import time
 
@@ -24,9 +24,12 @@ def process1(plist):
         pool.map(pull_file, plist)
         pool.map(crop_to_square, plist)
 
+
 def avatars(limit: int = 10, start: int = 0):
     try:
-        os.makedirs("avatars", exist_ok=True)
+        os.makedirs("data/avatars", exist_ok=True)
+        os.makedirs("data/db", exist_ok=True)
+        # os.makedirs("avatars/processed", exist_ok=True)
     except:
         print("Directory does not exist and can't be made")
         exit()
@@ -34,8 +37,8 @@ def avatars(limit: int = 10, start: int = 0):
 
     avatar_list = db.user.get_missing()
     _iter = 0
-    _relstart=0
-    _reljump=10
+    _relstart = 0
+    _reljump = 10
     processlist = []
     for av in avatar_list:
         if _iter >= limit:
@@ -46,7 +49,6 @@ def avatars(limit: int = 10, start: int = 0):
             print(f'Error getting avatar for user {av}')
             continue
         if redir.split("/")[-1] == 'default_avatar_2x.png':
-            print("default avatar")
             db.user.name_avatar(av, 'default_avatar_2x.png')
             continue
         print(f"{_iter=} {av=}")
@@ -55,4 +57,4 @@ def avatars(limit: int = 10, start: int = 0):
         if _iter > 0 and _iter % _reljump == 0:
             print('sending chunk to queue')
             process1(processlist[_relstart:(_relstart + _reljump)])
-            _relstart = _relstart +_reljump
+            _relstart = _relstart + _reljump
