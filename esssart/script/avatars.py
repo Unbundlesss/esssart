@@ -1,8 +1,8 @@
 import requests
 import json
 import os
-from . import db
-from . import crop_to_square
+from .. import db
+from .. import crop_to_square
 from multiprocessing import Pool
 import time
 

@@ -1,7 +1,7 @@
 import requests
 import json
 import os
-from . import endlesss_auth
+from .. import endlesss_auth
 
 
 def request_riffs(limit, start):

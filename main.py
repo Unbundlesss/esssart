@@ -1,12 +1,12 @@
 import argparse
 import sys
-from ptpython.repl import embed
+from ptpython.ipython import embed
 
 
 # from esssart.sources import pull_sources_list, seed_db
 # from esssart.avatars import avatars
 # from esssart.riff_pics import request_riffs, request_liked_riffs
-from esssart.db import db
+
 
 def main(argsv):
     parser = argparse.ArgumentParser(description="run command.")
@@ -25,25 +25,24 @@ def main(argsv):
         required=False,
         help="starting point of the list",
     )
+    parser.add_argument(
+        "--file",
+        type=str,
+        default=None,
+        required=False,
+        help="load file when needed"
+    )
     args = parser.parse_args(argsv)
-    if args.cmd == "create":
-        pull_sources_list()
-        seed_db()
 
-    if args.cmd == "avatars":
-        avatars(limit=args.limit, start=args.start)
-
-    if args.cmd == "riffdata":
-        request_riffs(limit=args.limit, start=args.start)
-
-    if args.cmd == "likedriffdata":
-        request_liked_riffs(limit=args.limit, start=args.start)
+    if args.cmd == "shared":
+        pass
 
     if args.cmd == "seed":
-        seed_db()
+        pass
 
     if args.cmd == "cli":
-        pass
+        embed()
+
 
 if __name__ == "__main__":
     main(sys.argv[1:])
