@@ -7,3 +7,9 @@ users
 __pycache__
 .vscode
 .idea
+*.bin
+*.zip
+*.fish
+*.proxymansessionv2
+.temp
+*.pyc
