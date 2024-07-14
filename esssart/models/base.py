@@ -1,19 +1,32 @@
 from collections import namedtuple
+from ptpython.utils import ptrepr_to_repr
+from prompt_toolkit.formatted_text import HTML
 
 
+@ptrepr_to_repr
 class Base:
-    tuple = None
     table = None
     index = []
     schema = None
     extra = []
     fields = []
+    tuple = None
+
+    def __pt_repr__(self):
+        qclass = self.__class__.__name__
+        table = self.table
+        fields = "\n        ".join(self.field_names)
+        return HTML(
+            f"""<yellow>Model: {qclass} </yellow>
+<blue>Table: {table}</blue>
+Fields: {fields}"""
+        )
 
     def __init__(self, db):
         if self.extra:
-            extras = ', '.join(self.extra) + ', '
+            extras = ", ".join(self.extra) + ", "
         else:
-            extras = ''
+            extras = ""
 
         if not self.schema:
             self.schema = f"""
@@ -33,9 +46,7 @@ class Base:
         return self.get_one(last_id)
 
     def get_one(self, _id):
-        self.db.cursor().execute(
-            f"SELECT * FROM {self.table} WHERE id = ?", (_id,)
-        )
+        self.db.cursor().execute(f"SELECT * FROM {self.table} WHERE id = ?", (_id,))
         row = self.db.cursor().fetchone()
         return self.tuple(*row)
 
@@ -52,30 +63,33 @@ class Base:
 
     def get_many(self, param, value, limit=100):
         cur = self.db.cursor()
-        values = tuple(param, value, limit)
-        condition = f"WHERE ? = ?"
-        limit = f"LIMIT ?"
-        cur.execute(f"SELECT * FROM {self.table} {condition} {limit}", values)
+        values = [param, value, limit]
+        cur.execute(f"SELECT * FROM {self.table} WHERE ? = ? LIMIT ?", tuple(values))
         return [self.tuple(*row) for row in cur.fetchall()]
 
     def name_create_many(self, users):
-        self.db.cursor().executemany("INSERT OR IGNORE INTO user (username) VALUES (?)", users)
+        self.db.cursor().executemany(
+            "INSERT OR IGNORE INTO user (username) VALUES (?)", users
+        )
         self.db.commit()
 
-    def get_custom(self, param, value):
+    def get_custom(self, param, value, asdict=False):
         cur = self.db.cur
         values = tuple(param, value)
         cur.execute(f"SELECT * from {self.table} WHERE ? = ?", values)
-        return self.tuple(*cur.fetchOne())
+        if asdict:
+            return cur.fetchOne()
+        else:
+            return self.tuple(*cur.fetchOne())
 
     def get_schema(self):
         if self.index:
-            index = ','.join(["CREATE INDEX {index};" for index in self.index])
+            index = ",".join([f"CREATE INDEX {index};" for index in self.index])
             return f"""\
                 {self.schema};
                 {index}"""
         else:
-            return f"""{self.schema}""";
+            return f"""{self.schema}"""
 
     def init(self):
         cur = self.db.cursor()

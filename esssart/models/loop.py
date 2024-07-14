@@ -5,35 +5,42 @@ from .base import Base
 class Loop(Base):
     table = "loop"
     fields = [
-        "_id TEXT PRIMARY KEY",
-        "barLength INTEGER",
-        "user_name TEXT",
-        "bps REAL",
+        "id TEXT PRIMARY KEY",
+        "app_version INTEGER",
+        'attachment_id TEXT',
+        "bar_length INTEGER",
+        "username TEXT",
+        "creator_id INTEGER",
+        "bps string",
         "instrument TEXT",
-        "bufferPath TEXT",
-        "bufferURL TEXT",
+        "buffer_path TEXT",
+        "buffer_url TEXT",
         "created INTEGER",
-        "colourHistory BLOB",
-        "cdn_attachment TEXT"
-        "creatorUserName TEXT",
-        "isBass INTEGER",
-        "isDrum INTEGER",
-        "isMic INTEGER",
-        "isNote INTEGER",
+        "color_history BLOB",
+        "cdn_attachment_id integer"
+        "creator_username TEXT",
+        'is_bass BOOLEAN',
+        'is_drum BOOLEAN',
+        'is_mic BOOLEAN',
+        'is_normalized BOOLEAN',
+        'is_note BOOLEAN',
         "length INTEGER",
-        "length16ths INTEGER",
-        "originalPitch INTEGER",
-        "presetName TEXT",
-        "primaryColour TEXT",
-        "sampleRate INTEGER"
+        "length_16ths INTEGER",
+        "original_pitch INTEGER",
+        "preset_name TEXT",
+        "primary_colour TEXT",
+        "sample_rate INTEGER",
+        'created TEXT',
     ]
 
-    index = ["loop_idx ON loop(_id, username)"]
+    index = ["loop_idx ON loop(id)",
+             "loop_idx_attachment ON loop(attachment_id)"
+             "loop_user on loop(username)"
+             "loop_creator on loop(creator_id)"]
 
     def __init__(self, db):
         super().__init__(db)
         self.Loop = namedtuple("Loop", self.field_names)
         self.tuple = self.Loop
 
-    def create(self, **kwargs):
-        self.add(kwargs)
+

@@ -1,12 +1,25 @@
+import mimetypes
 from collections import namedtuple
 from .base import Base
 import json
 
 
 class Attachment(Base):
-    fields = ["_id INTEGER PRIMARY KEY", "key TEXT UNIQUE NOT NULL", "type TEXT", "endpoint TEXT", "hash TEXT",
-              "length INTEGER", "mime TEXT", "url TEXT", "local TEXT"]
+    fields = [
+        "id INTEGER PRIMARY KEY",
+        "name TEXT UNIQUE",
+        "key TEXT UNIQUE NOT NULL",
+        "bucket TEXT",
+        "type TEXT",
+        "endpoint TEXT",
+        "hash TEXT",
+        "length INTEGER",
+        "mime TEXT",
+        "url TEXT",
+        "local TEXT",
+    ]
     extra = ["unique(key)"]
+    index = ["attachment_key ON attachment(key)"]
     table = "attachment"
 
     def __init__(self, db):
@@ -14,15 +27,16 @@ class Attachment(Base):
         self.Attachment = namedtuple("Attachment", self.field_names)
         self.tuple = self.Attachment
 
-    def create(self, dict):
-        self.add(dict)
+    def pull_missing(self, limit=100):
+        return self.get_many("local", "", limit)
 
-    def pull_missing(self, qtype, limit=100):
-        return self.get_many('type', qtype, limit)
+    def get_attachment(self, _id):
+        return self.get_one(_id)
 
-        # "endpoint": "ndls-att2.ams3.digitaloceanspaces.com",
-        # "hash": "",
-        # "key": "attachments/oggAudio/band2e9c40ccec/1181db40c5ef11ea9b40c0dd3fc95868",
-        # "length": 296977,
-        # "mime": "audio/ogg",
-        # "url": "https://ndls-att2.ams3.digitaloceanspaces.com/attachments/oggAudio/band2e9c40ccec/1181db40c5ef11ea9b40c0dd3fc95868"
+    def add_attachment(self, att):
+        self.add(att)
+
+    def update_local(self, local, key):
+        self.db.cur.execute(
+            f"UPDATE {self.table} SET local = ? WHERE key = ?", (local, key)
+        )
