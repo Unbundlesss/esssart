@@ -2,6 +2,7 @@ import argparse
 import sys
 from ptpython.ipython import embed
 
+from esssart import db
 
 # from esssart.sources import pull_sources_list, seed_db
 # from esssart.avatars import avatars

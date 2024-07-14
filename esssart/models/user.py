@@ -3,7 +3,7 @@ from .base import Base
 
 class User(Base):
     extra = ["UNIQUE(username)"]
-    fields = ["_id INTEGER PRIMARY KEY", "username TEXT", "avatar TEXT"]
+    fields = ["id INTEGER PRIMARY KEY", "username TEXT", "avatar TEXT"]
     table = "user"
     index = ["username on user(username)"]
     def __init__(self, db):
@@ -23,7 +23,7 @@ class User(Base):
         self.db.commit()
 
     def has_avatar(self, name):
-        cur = self.db.cursor().execute("SELECT user, avatar FROM user WHERE username = ?", (name,))
+        cur = self.db.cursor().execute("SELECT username, avatar FROM user WHERE username = ?", (name,))
         if cur.rowcount > 0:
             if cur.fetchOne().avatar != "":
                 return True
