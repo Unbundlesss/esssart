@@ -22,7 +22,7 @@ class SharedRiff(Base):
         "creators BLOB",
         "database_id TEXT",
         "image BOOLEAN",
-        "attachment_id TEXT",
+        "image_attachment_id TEXT",
         "image_url TEXT",
         "layer_colors BLOB",
         "likes INTEGER",
@@ -54,9 +54,6 @@ class SharedRiff(Base):
             "SharedRiff",
             self.field_names,
         )
-        self.SharedRiffWithLoops = namedtuple(
-            "SharedRiffWithLoops", self.field_names + ["loops"]
-        )
         self.tuple = self.SharedRiff
 
     def add_loop(self, riff, loop):
@@ -73,43 +70,3 @@ class SharedRiff(Base):
 
 
 
-    def get_mapping(self, doc_data):
-        mapping = {}
-        mapping.id = doc_data.get("doc_id")
-        mapping.user = doc_data.get("user")
-        mapping.band = doc_data.get("band")
-        mapping.database_id = doc_data.get("database_id")
-        mapping.type = doc_data.get("type")
-        mapping.action_timestamp = doc_data.get("action_timestamp")
-        mapping.action_timestamp_iso = doc_data.get("action_timestamp_iso")
-        mapping.title = doc_data.get("title")
-        mapping.private = doc_data.get("private")
-        mapping.creators = doc_data.get("creators", [])
-        mapping.react_counts = doc_data.get("react_counts", {})
-        mapping.riff = doc_data.get("rifff", {})
-        mapping.loops = doc_data.get("loops", [])
-        mapping.image_attachment = doc_data.get("image_attachment", {})
-        mapping.image_url = doc_data.get("image_url")
-        mapping.image = doc_data.get("image")
-
-        mapping.app_version = doc_data.get("app_version")
-        mapping.brightness = doc_data.get("brightness")
-        mapping.colour = doc_data.get("colour")
-        mapping.created = doc_data.get("created")
-        mapping.layer_colours = doc_data.get("layerColours")
-        mapping.magnitude = doc_data.get("magnitude")
-        mapping.peak_data = doc_data.get("peakData")
-        mapping.root = doc_data.get("root")
-        mapping.scale = doc_data.get("scale")
-        mapping.sent_by = doc_data.get("sentBy")
-        mapping.bar_length = doc_data.get("barLength")
-        mapping.bps = doc_data.get("bps")
-        mapping.type = doc_data.get("type")
-        mapping.user_name = doc_data.get("user_name")
-        mapping.title = doc_data.get("title")
-        mapping.type = doc_data.get("type")
-        mapping.user = doc_data.get("user")
-    def goops(self, _id):
-        riff = self.get_riff_dict(_id)
-        riff.loops = self.get_loops(_id)
-        return self.SharedRiffWithLoops(riff)

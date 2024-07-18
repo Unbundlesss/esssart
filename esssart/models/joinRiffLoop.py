@@ -21,3 +21,7 @@ class JoinRiffLoop(BaseM2M):
         return [
             self.JoinRiffLoop(row) for row in self.get_related(self, shared_riff_id)
         ]
+
+    def join_loops_to_riff(self, riff, loops):
+        for loop in loops:
+            self.add({"shared_riff_id": riff.id, "loop_id": loop.id, "gain": loop.gain, loop.on: loop.on})

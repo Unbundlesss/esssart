@@ -51,13 +51,13 @@ model_classes = [User, SharedRiff, Loop, Attachment, JoinRiffLoop]
 # A dictionary named 'instances' is created with the keys being the snake_case version of the class names
 # and the values being instances of those classes. The connection object 'con' is passed to each class
 # during instantiation.
-instances: Dict[str, Union[Base, Vault, Connection, Cursor]] = {
+instances: Dict[str, Union[Base, Vault, Connection, Cursor, Attachment]] = {
     **{snake_case(cls.__name__): cls(con) for cls in model_classes},
     **{k: v for k, v in zip(["vault", "con", "cur"], [Vault(indata), con, con.cursor()])},
 }
 
 # stick the whole thing into the db wad
-db = namedtuple("dbconnection", instances.keys())(**instances)
+db: namedtuple = namedtuple("dbconnection", instances.keys())(**instances)
 
 
 # idempotent

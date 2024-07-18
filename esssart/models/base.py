@@ -41,6 +41,9 @@ Fields: {fields}"""
     def get_field_names(fields):
         return [field.split()[0] for field in fields]
 
+    def get_fields(self):
+        return self.get_field_names(self.fields)
+
     def get_last(self):
         last_id = self.db.cursor().lastrowid
         return self.get_one(last_id)

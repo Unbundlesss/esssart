@@ -7,7 +7,6 @@ class Loop(Base):
     fields = [
         "id TEXT PRIMARY KEY",
         "app_version INTEGER",
-        'attachment_id TEXT',
         "bar_length INTEGER",
         "username TEXT",
         "creator_id INTEGER",
@@ -17,7 +16,7 @@ class Loop(Base):
         "buffer_url TEXT",
         "created INTEGER",
         "color_history BLOB",
-        "cdn_attachment_id integer"
+        "audio_attachment_id integer",
         "creator_username TEXT",
         'is_bass BOOLEAN',
         'is_drum BOOLEAN',
@@ -34,7 +33,7 @@ class Loop(Base):
     ]
 
     index = ["loop_idx ON loop(id)",
-             "loop_idx_attachment ON loop(attachment_id)"
+             "loop_idx_attachment ON loop(audio_attachment_id)"
              "loop_user on loop(username)"
              "loop_creator on loop(creator_id)"]
 

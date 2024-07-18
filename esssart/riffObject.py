@@ -1,6 +1,6 @@
 import json
 import decimal
-
+import db
 
 class RiffObject:
     @staticmethod
@@ -17,7 +17,7 @@ class RiffObject:
         return obj
 
     @staticmethod
-    def as_obj(dct):
+    def json_obj(dct):
         # pull loop state
         loop_states = map(
             lambda x: dict(
@@ -30,7 +30,7 @@ class RiffObject:
             lambda x: dict(
                 id=x.get('_id'),
                 app_version=x.get('app_version'),
-                attachment=x.get('cdn_attachments'),
+                audio_attachment_id=None,
                 audio_attachment=RiffObject.key_to_type(x.get('cdn_attachments')),
                 bar_length=x.get('barLength'),
                 bps=x.get('bps'),
@@ -71,6 +71,7 @@ class RiffObject:
             created=dct.get('rifff', {}).get('created'),
             creators=json.dumps(dct.get('creators', [])),
             database_id=dct.get('database_id'),
+            image_attachment_id=None,
             image=dct.get('image'),
             image_attachment=RiffObject.key_to_type(dct.get('image_attachment')),
             image_url=dct.get('image_url'),
@@ -89,7 +90,7 @@ class RiffObject:
         return out
 
     def __init__(self, _input):
-        self.__dict__ = json.loads(_input, object_hook=self.as_obj, parse_float=decimal.Decimal)
+        self.__dict__ = json.loads(_input, object_hook=self.json_obj, parse_float=decimal.Decimal)
 
     def __str__(self):
         return str(self.__dict__)
@@ -99,3 +100,19 @@ class RiffObject:
 
     def get(self, key):
         return self.__dict__.get(key)
+
+    def loops(self):
+        return self.__dict__.get('loops')
+
+    def riff(self):
+       return {i: self.__dict__.get(i) for i in db.shared_riff.get_fields()}
+
+    def image(self):
+        return self.__dict__.get('image_attachment')
+
+    def remove(self, key):
+        del self.__dict__[key]
+
+    def set(self, key, value):
+        self.__dict__[key] = value
+
