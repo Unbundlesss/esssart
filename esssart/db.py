@@ -1,17 +1,14 @@
 import os
 import sqlite3
-from collections import namedtuple
-from typing import Dict, Any
-from typing import Union
+from typing import Dict, Any, NamedTuple
 from sqlite3 import Connection, Cursor
-from unittest.mock import Mock
-
 from .models import Base
 from .models import SharedRiff, Loop, User, JoinRiffLoop, Attachment
 import re
 from .vault import Vault
 
 dbpath = "data/db/esssart.database.db"
+os.makedirs(os.path.dirname(dbpath), exist_ok=True)
 is_new = True if not os.path.exists(dbpath) else False
 
 pattern = re.compile(r"(?<!^)(?=[A-Z])")
@@ -43,21 +40,30 @@ def snake_case(name):
 
 
 # initialize models and join non-models
-model_classes = [User, SharedRiff, Loop, Attachment, JoinRiffLoop]
+model_classes = [Base, User, SharedRiff, Loop, Attachment, JoinRiffLoop]
 
-
-# This block of code is responsible for creating instances of the models and other necessary components
-# and storing them in a dictionary for easy access.
-# A dictionary named 'instances' is created with the keys being the snake_case version of the class names
-# and the values being instances of those classes. The connection object 'con' is passed to each class
-# during instantiation.
-instances: Dict[str, Union[Base, Vault, Connection, Cursor, Attachment]] = {
-    **{snake_case(cls.__name__): cls(con) for cls in model_classes},
-    **{k: v for k, v in zip(["vault", "con", "cur"], [Vault(indata), con, con.cursor()])},
-}
 
 # stick the whole thing into the db wad
-db: namedtuple = namedtuple("dbconnection", instances.keys())(**instances)
+class DbConnect(NamedTuple):
+    base: Base
+    user: User
+    shared_riff: SharedRiff
+    loop: Loop
+    attachment: Attachment
+    join_riff_loop: JoinRiffLoop
+    vault: Vault
+    con: Connection
+    cur: Cursor
+
+
+model_instances = {snake_case(cls.__name__): cls(con) for cls in model_classes}
+other_instances = {"vault": Vault(indata), "con": con, "cur": con.cursor()}
+
+# Combine the dictionaries
+instances = {**model_instances, **other_instances}
+
+# stick the whole thing into the db wad
+db = DbConnect(**instances)
 
 
 # idempotent
@@ -71,14 +77,12 @@ def create_table_if_not_exists(model: Base):
     Returns:
         None
     """
-    schema, table_name = model.schema, model.table
-    model.db = Mock()
-    model.db.cur.execute(
+    schema, table_name = model.get_schema(), model.table
+    db.cur.execute(
         f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'"
     )
-    if not model.db.cur.fetchone():
-        model.db.cur.execute(schema)
-        model.db.cur.commit()
+    if not db.cur.fetchone():
+        model.init()
 
 
 # idempotent
