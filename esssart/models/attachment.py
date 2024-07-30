@@ -33,8 +33,9 @@ class Attachment(Base):
     def get_attachment(self, _id):
         return self.get_one(_id)
 
-    def add_attachment(self, att):
+    def create_attachment(self, att):
         self.add(att)
+        return self.get_last()
 
     def update_local(self, local, key):
         self.db.cur.execute(

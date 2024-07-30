@@ -1,7 +1,8 @@
+import mimetypes
 from collections import namedtuple
 from . import Loop
 from .base import Base
-
+import json
 
 class SharedRiff(Base):
     extra = []
@@ -38,8 +39,6 @@ class SharedRiff(Base):
         "user TEXT"
         'comment_count INTEGER',
         'comments TEXT',
-        'magnitude REAL',
-        'private BOOLEAN'
     ]
     index = [
         "shared_riff_id_user_id ON shared_riff(id, user_id)",

@@ -28,8 +28,7 @@ class Loop(Base):
         "original_pitch INTEGER",
         "preset_name TEXT",
         "primary_colour TEXT",
-        "sample_rate INTEGER",
-        'created TEXT',
+        "sample_rate INTEGER"
     ]
 
     index = ["loop_idx ON loop(id)",
@@ -42,4 +41,7 @@ class Loop(Base):
         self.Loop = namedtuple("Loop", self.field_names)
         self.tuple = self.Loop
 
+    def create_loop(self, loop):
+        self.add(loop)
+        return self.get_last()
 
