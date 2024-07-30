@@ -4,11 +4,12 @@ from .. import db
 
 def add_riff(obj: RiffObject):
     # get image
-    image = obj.image()
+
     # make into attachment, get id
-    db.i
+    image = db.attachment.create_attachment(obj.image())
 
     # attach image to riff via id
+
 
     # get loops
 
