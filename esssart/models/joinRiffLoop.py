@@ -5,7 +5,13 @@ from .basem2m import BaseM2M
 
 
 class JoinRiffLoop(BaseM2M):
-    fields = ["shared_riff_id TEXT", "loop_id TEXT", "gain REAL", "on BOOLEAN"]
+    fields = [
+        "shared_riff_id TEXT",
+        "loop_id TEXT",
+        "gain REAL",
+        "on BOOLEAN",
+        "ordinal INTEGER",
+    ]
     foreign_keys = ["shared_riff", "loop"]
     table = "join_riff_loop"
     index = [f"shared_riff_loop_idx on {table}(shared_riff, loop)"]
@@ -24,4 +30,12 @@ class JoinRiffLoop(BaseM2M):
 
     def join_loops_to_riff(self, riff, loops):
         for loop in loops:
-            self.add({"shared_riff_id": riff.id, "loop_id": loop.id, "gain": loop.gain, loop.on: loop.on})
+            self.add(
+                {
+                    "shared_riff_id": riff.id,
+                    "loop_id": loop.id,
+                    "gain": loop.gain,
+                    "on": loop.on,
+                    "ordinal": loop.ordinal,
+                }
+            )
