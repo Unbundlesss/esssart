@@ -1,28 +1,29 @@
 from ptpython.utils import ptrepr_to_repr
 from prompt_toolkit.formatted_text import HTML
 from ..decorators import handle_params
-
+from abc import ABC, abstractmethod
 
 @ptrepr_to_repr
-class Base:
+class Base(ABC):
     table = None
     index = []
-    schema = None
     extra = []
     fields = []
-    tuple = None
+    app = None
 
     def __pt_repr__(self):
         qclass = self.__class__.__name__
         table = self.table
         fields = "\n        ".join(self.field_names)
         return HTML(
-            f"""<yellow>Model: {qclass} </yellow>
+            f"""\n<yellow>Model: {qclass} </yellow>
 <blue>Table: {table}</blue>
 Fields: {fields}\n"""
         )
 
-    def __init__(self, db):
+    def __init__(self, con):
+        self.con = con
+        self.cur = con.cursor()
         if self.extra:
             extras = ", ".join(self.extra) + ", "
         else:
@@ -34,7 +35,10 @@ Fields: {fields}\n"""
                 {extras})"""
 
         self.field_names = self.get_field_names(self.fields)
-        self.db = db
+
+    @classmethod
+    def set_app(cls, app):
+        cls.app = app
 
     @staticmethod
     def get_field_names(fields):
@@ -44,12 +48,12 @@ Fields: {fields}\n"""
         return self.get_field_names(self.fields)
 
     def get_last(self):
-        last_id = self.db.cur.lastrowid
+        last_id = self.cur.lastrowid
         return self.get_one(last_id)
 
     def get_one(self, _id):
-        self.db.cur.execute(f"SELECT * FROM {self.table} WHERE id = ?", (_id,))
-        row = self.db.cur.fetchone()
+        self.cur.execute(f"SELECT * FROM {self.table} WHERE id = ?", (_id,))
+        row = self.cur.fetchone()
         return self.tuple(*row)
 
     @handle_params
@@ -58,10 +62,10 @@ Fields: {fields}\n"""
         columns = ", ".join(qlist)
         placeholders = ", ".join("?" for _ in qdict)
         values = tuple(qdict.values())
-        self.db.cur.execute(
+        self.cur.execute(
             f"INSERT INTO {self.table} ({columns}) VALUES ({placeholders})", values
         )
-        self.db.commit()
+        self.con.commit()
 
     def whitelist(self, ql):
         for key in ql:
@@ -75,7 +79,7 @@ Fields: {fields}\n"""
         columns = ", ".join(qlist)
         placeholders = ", ".join("?" for _ in qdict)
         values = [qdict.values(), check]
-        self.db.cur.execute(
+        self.cur.execute(
             f"""INSERT INTO {self.table} ({columns}) 
             VALUES ({placeholders}) 
             WHERE NOT EXISTS
@@ -83,14 +87,22 @@ Fields: {fields}\n"""
             """,
             values,
         )
-        self.db.commit()
+        self.con.commit()
 
     def colcheck(self, col):
         if col not in self.field_names:
             raise ValueError(f"Invalid column: {col}")
 
+    def get_these(self, ids):
+        cur = self.cur
+        cur.execute(
+            f"SELECT * FROM {self.table} WHERE id IN ({','.join('?' for _ in ids)})",
+            (ids,)
+        )
+        return [self.tuple(*row) for row in cur.fetchall()]
+
     def get_many(self, param, value, limit=100):
-        cur = self.db.cur
+        cur = self.cur
         self.colcheck(param)
 
         cur.execute(
@@ -99,7 +111,7 @@ Fields: {fields}\n"""
         return [self.tuple(*row) for row in cur.fetchall()]
 
     def get_all(self):
-        cur = self.db.cur
+        cur = self.cur
         cur.execute(f"SELECT * FROM {self.table}")
         rows = cur.fetchall()
         if rows:
@@ -107,13 +119,13 @@ Fields: {fields}\n"""
         return []
 
     def name_create_many(self, users):
-        self.db.cur.executemany(
+        self.cur.executemany(
             "INSERT OR IGNORE INTO user (username) VALUES (?)", users
         )
-        self.db.commit()
+        self.con.commit()
 
     def get_custom(self, param, value, asdict=False):
-        cur = self.db.cur
+        cur = self.cur
         self.colcheck(param)
         values = (value,)
         cur.execute(f"SELECT * from {self.table} WHERE {param} = ?", values)
@@ -141,21 +153,21 @@ Fields: {fields}\n"""
         if not id:
             raise ValueError("Primary key 'id' must be provided for update")
 
-        self.db.cur.execute(
+        self.cur.execute(
             f"UPDATE {self.table} SET {set_clause} WHERE id = ?",
             values + (id,),
         )
-        self.db.commit()
+        self.con.commit()
 
     def delete(self, id):
         if not id:
             raise ValueError("Primary key 'id' must be provided for delete")
 
-        self.db.cur.execute(f"DELETE FROM {self.table} WHERE id = ?", (id,))
-        self.db.commit()
+        self.cur.execute(f"DELETE FROM {self.table} WHERE id = ?", (id,))
+        self.con.commit()
 
     def init(self):
         cmds = self.get_schema()
         for cmd in cmds:
-            self.db.cur.execute(cmd)
-            self.db.commit()
+            self.cur.execute(cmd)
+            self.con.commit()

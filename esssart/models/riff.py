@@ -3,6 +3,7 @@ from collections import namedtuple
 from . import Loop
 from .base import Base
 import json
+from esssart import app
 
 class SharedRiff(Base):
     extra = []
@@ -20,6 +21,7 @@ class SharedRiff(Base):
         "color TEXT",
         "contributors TEXT",
         "created integer",
+        "creator_id TEXT",
         "creators BLOB",
         "database_id TEXT",
         "image BOOLEAN",
@@ -47,8 +49,8 @@ class SharedRiff(Base):
         "shared_riff_time_iso ON shared_riff(action_timestamp_iso)"
     ]
 
-    def __init__(self, db):
-        super().__init__(db)
+    def __init__(self, con):
+        super().__init__(con)
         self.SharedRiff = namedtuple(
             "SharedRiff",
             self.field_names,
@@ -59,7 +61,7 @@ class SharedRiff(Base):
         pass
 
     def get_loops(self, shared_riff_id):
-        return self.db.shared_riff_loop.get_related_loops(shared_riff_id)
+        return self.app.shared_riff_loop.get_related_loops(shared_riff_id)
 
     def get_riff(self, shared_riff_id):
         return self.get_custom("id", shared_riff_id)

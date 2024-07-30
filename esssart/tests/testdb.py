@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import Mock, call
-from esssart.db import create_table_if_not_exists, snake_case, DbConnect
+from esssart.app import create_table_if_not_exists, snake_case, DbConnect
 from esssart.models.base import Base
 
 class TestDbConnect(unittest.TestCase):

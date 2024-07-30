@@ -27,10 +27,9 @@ class RifffDoc:
     # field names and foreigns
     schema = f"CREATE TABLE shared_riff ({', '.join(fields)}), {foreigns}"
 
-    def __init__(self, doc_data, db):
+    def __init__(self, db):
         super().__init__(db)
         self.SharedRiff = namedtuple("SharedRiff", self.field_names)
-        self.db = db
 
     def fromJson(self, doc_data):
         mapping = {}

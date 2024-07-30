@@ -1,15 +1,15 @@
 import json
 import decimal
-from .db import db
+from .app import app
 
 
 class RiffObject:
-
-    _loops=[]
-    _loop_audio=[]
-    _riff=None
-    _image=None
-    _joins=[]
+    _loops = []
+    _loop_audio = []
+    _riff = None
+    _image = None
+    _joins = []
+    _loop_ids = []
 
     @staticmethod
     def key_to_type(att):
@@ -114,61 +114,64 @@ class RiffObject:
     def get(self, key, default=None):
         return self.__dict__.get(key, default)
 
-    def loops(self):
+    def get_loops(self):
         # see if the loops are cached
         _loops = self.get('_loops', [])
         if not _loops:
-            # if we dont have the loop ids
-            if not self.get('loop_ids', []):
-                loop_ids = list(map(lambda x: x.id, self.get('loops')))
-                self.set('loop_ids', loop_ids)
-                loops = list(map(lambda x: db.loop.create_loop(x), self.get('loops')))
-                return loops
-            else:
-                return list(map(lambda x: db.loop.get_loop(x), self.get('loop_ids')))
+            json_loops = self.get('loops', [])
+            _audio_loops = list(map(lambda x: self.parse_audio(x), json_loops))
+            _loops = list(map(lambda x, y: x.set('audio_attachment_id', y.id), json_loops, _audio_loops))
+            app.loop.create_many(_loops)
+            if not self._loop_ids:
+                self._loop_ids = list(map(lambda x: x.id, _loops))
 
-    def process_loops(self):
-        for loop in self.loops():
-            self.parse_audio(loop)
+            self._loops = app.loop.get_these(self._loop_ids)
 
-    def _loopy(self, l):
-        audio = self._audio(l)
-        last = db.loop.create_loop(l)
-        l.set
-        return last
+        return self._loops
 
     def parse_audio(self, loop):
         """create the audio attach ment for a loop if not exists.
         Return the audio attachment"""
-
         # if the audio is cached, return it
         if self._loop_audio[loop.ordinal]:
             return self._loop_audio[loop.ordinal]
 
         # if the attachment_id is not set, then the audio is made
         if loop.get('audio_attachment_id') is None:
-            audio = db.attachment.create_attachment(loop.audio_attachment)
+            audio = app.attachment.create_attachment(loop.audio_attachment)
             self._loop_audio[loop.ordinal] = audio
             loop.set('audio_attachment_id', audio.id)
 
         # get the audio attachment
-        audio = db.attachment.get_attachment(loop.get('audio_attachment_id'))
+        audio = app.attachment.get_attachment(loop.get('audio_attachment_id'))
         return audio
 
-    def riff(self):
-        fields = {i: self.__dict__.get(i) for i in db.shared_riff.get_fields()}
-        riff = db.shared_riff.create_shared_riff(fields)
+    def build_riff(self):
+        # make image
+        fields = {i: self.__dict__.get(i) for i in app.shared_riff.get_fields()}
+        db_riff = app.shared_riff.get_by_id(self.get('id'))
+        if not db_riff:
+            db_riff = app.shared_riff.create_shared_riff(fields)
 
+        image = self.image()
+        db_riff.image_attachment = image
+
+        loops = self.get_loops()
 
         # join loops using join_riff_loop
-        db.join_riff_loop.join_loops_to_riff(riff, self.loops())
+        app.join_riff_loop.join_loops_to_riff(db_riff, loops)
+        db_riff.loops = loops
 
     def image(self):
+        if self._image:
+            return self._image
         if self.get("image_attachment_id") is None:
-            image = db.attachment.create_attachment(self.get('image_attachment'))
+            image = app.attachment.create_attachment(self.get('image_attachment'))
             self.set('image_attachment_id', image.id)
         else:
-            image = db.attachment.get_attachment(self.get('image_attachment_id'))
+            image = app.attachment.get_attachment(self.get('image_attachment_id'))
+
+        self._image = image
         return image
 
     def remove(self, key):

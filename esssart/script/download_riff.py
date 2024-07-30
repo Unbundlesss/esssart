@@ -1,6 +1,6 @@
 import requests
 import os
-from .. import db
+from .. import app
 from multiprocessing import Pool
 import json
 import time
@@ -10,13 +10,13 @@ s.headers.update({"User-Agent": "Mozilla/5.0"})
 
 def digest_riff(riff):
     # get the vault
-    stash = db.vault.stem
+    stash = app.vault.stem
 
     # convert riff from json to Riff object by separating the loops and cdn_attachments out
 
 
     # get the loops for the riff
-    loops = db.riff.get_loops(riff.id)
+    loops = app.riff.get_loops(riff.id)
 
     # create a folder for the riff
     folder = stash.folder("riff", riff.id)
@@ -41,19 +41,19 @@ def digest_riff(riff):
     for loop, loop_file in zip(loops, loop_files):
         loop_file.save(loop)
 
-    # update the db with local paths
-    db.riff.update_local(riff_file.path(), riff.id)
+    # update the app with local paths
+    app.riff.update_local(riff_file.path(), riff.id)
     for loop, loop_file in zip(loops, loop_files):
-        db.loop.update_local(loop_file.path(), loop.id)
+        app.loop.update_local(loop_file.path(), loop.id)
 
     return riff.id
 
 
 def download_attachment(_id):
     # get the vault
-    stash = db.vault.stem
-    # get attachment from db
-    att = db.attachment.get_attachment(_id)
+    stash = app.vault.stem
+    # get attachment from app
+    att = app.attachment.get_attachment(_id)
     # download the file
     resp = s.get(att.url)
 
@@ -61,5 +61,5 @@ def download_attachment(_id):
     file = stash(att, resp.content)
     file.save()
 
-    # update db with local path
-    db.attachment.update_local(file.path(), att.key)
+    # update app with local path
+    app.attachment.update_local(file.path(), att.key)

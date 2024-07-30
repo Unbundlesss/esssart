@@ -1,7 +1,7 @@
 import json
 
 import requests
-from ..db import db
+from ..app import app
 
 def pull_sources_list():
     data_sources = [

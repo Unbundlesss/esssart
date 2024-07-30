@@ -16,8 +16,8 @@ class JoinRiffLoop(BaseM2M):
     table = "join_riff_loop"
     index = [f"shared_riff_loop_idx on {table}(shared_riff, loop)"]
 
-    def __init__(self, db):
-        super().__init__(db)
+    def __init__(self, con):
+        super().__init__(con)
         self.JoinRiffLoop = namedtuple(
             "JoinRiffLoop", self.field_names + Loop.get_field_names(Loop.fields)
         )
@@ -30,6 +30,13 @@ class JoinRiffLoop(BaseM2M):
 
     def join_loops_to_riff(self, riff, loops):
         for loop in loops:
+            res = self.cur.execute(
+                f"SELECT * from {self.table} where shared_riff_id = ? and loop_id = ?",
+                (riff.id, loop.id),
+            )
+            if res.fetchone():
+                continue
+
             self.add(
                 {
                     "shared_riff_id": riff.id,

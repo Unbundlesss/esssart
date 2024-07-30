@@ -22,8 +22,8 @@ class Attachment(Base):
     index = ["attachment_key ON attachment(key)"]
     table = "attachment"
 
-    def __init__(self, db):
-        super().__init__(db)
+    def __init__(self, con):
+        super().__init__(con)
         self.Attachment = namedtuple("Attachment", self.field_names)
         self.tuple = self.Attachment
 
@@ -38,6 +38,6 @@ class Attachment(Base):
         return self.get_last()
 
     def update_local(self, local, key):
-        self.db.cur.execute(
+        self.cur.execute(
             f"UPDATE {self.table} SET local = ? WHERE key = ?", (local, key)
         )

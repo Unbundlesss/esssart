@@ -1,7 +1,7 @@
 import requests
 import json
 import os
-from .. import db
+from .. import app
 from .. import crop_to_square
 from multiprocessing import Pool
 import time
@@ -16,7 +16,7 @@ def pull_file(imgset):
     with open(file1, "wb") as file:
         file.write(data)
         print(f"{file1} pulled")
-    db.user.name_avatar(name, file1)
+    app.user.name_avatar(name, file1)
 
 
 def process1(plist):
@@ -28,14 +28,14 @@ def process1(plist):
 def avatars(limit: int = 10, start: int = 0):
     try:
         os.makedirs("data/avatars", exist_ok=True)
-        os.makedirs("data/db", exist_ok=True)
+        os.makedirs("data/app", exist_ok=True)
         # os.makedirs("avatars/processed", exist_ok=True)
     except:
         print("Directory does not exist and can't be made")
         exit()
     print('running')
 
-    avatar_list = db.user.get_missing()
+    avatar_list = app.user.get_missing()
     _iter = 0
     _relstart = 0
     _reljump = 10
@@ -49,7 +49,7 @@ def avatars(limit: int = 10, start: int = 0):
             print(f'Error getting avatar for user {av}')
             continue
         if redir.split("/")[-1] == 'default_avatar_2x.png':
-            db.user.name_avatar(av, 'default_avatar_2x.png')
+            app.user.name_avatar(av, 'default_avatar_2x.png')
             continue
         print(f"{_iter=} {av=}")
         _iter += 1

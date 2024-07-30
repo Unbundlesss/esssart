@@ -36,8 +36,8 @@ class Loop(Base):
              "loop_user on loop(username)"
              "loop_creator on loop(creator_id)"]
 
-    def __init__(self, db):
-        super().__init__(db)
+    def __init__(self, con):
+        super().__init__(con)
         self.Loop = namedtuple("Loop", self.field_names)
         self.tuple = self.Loop
 
