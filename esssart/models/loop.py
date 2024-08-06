@@ -32,9 +32,9 @@ class Loop(Base):
     ]
 
     index = ["loop_idx ON loop(id)",
-             "loop_idx_attachment ON loop(audio_attachment_id)"
-             "loop_user on loop(username)"
-             "loop_creator on loop(creator_id)"]
+             "loop_idx_attachment ON loop(audio_attachment_id)",
+             "loop_user_idx on loop(username)",
+             "loop_creator_idx on loop(creator_id)"]
 
     def __init__(self, con):
         super().__init__(con)

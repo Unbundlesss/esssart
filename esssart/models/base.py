@@ -10,6 +10,7 @@ class Base(ABC):
     extra = []
     fields = []
     app = None
+    schema = None
 
     def __pt_repr__(self):
         qclass = self.__class__.__name__
@@ -169,5 +170,9 @@ Fields: {fields}\n"""
     def init(self):
         cmds = self.get_schema()
         for cmd in cmds:
-            self.cur.execute(cmd)
+            try:
+                self.cur.execute(cmd)
+            except Exception as e:
+                print(f"Error: {e}")
+                continue
             self.con.commit()

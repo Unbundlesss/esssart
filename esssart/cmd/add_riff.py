@@ -1,12 +1,12 @@
 from ..riffObject import RiffObject
-from .. import db
+from .. import app
 
 
 def add_riff(obj: RiffObject):
     # get image
 
     # make into attachment, get id
-    image = db.attachment.create_attachment(obj.image())
+    image = app.attachment.create_attachment(obj.image())
 
     # attach image to riff via id
 
@@ -17,11 +17,11 @@ def add_riff(obj: RiffObject):
 
     # attach audio to loop by adding audio attachment id to loop
 
-    # create loop  in db, collect list of them
+    # create loop  in app, collect list of them
 
     # create riff
 
-    # join riff to loops in db via Join RiffLoop
+    # join riff to loops in app via Join RiffLoop
 
 
 
@@ -34,4 +34,4 @@ def add_riff(obj: RiffObject):
 
 
 
-    # create riff in db
+    # create riff in app

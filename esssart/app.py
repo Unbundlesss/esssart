@@ -11,6 +11,7 @@ from .vault import Vault
 dbpath = "data/app/esssart.database.app"
 os.makedirs(os.path.dirname(dbpath), exist_ok=True)
 is_new = True if not os.path.exists(dbpath) else False
+con = sqlite3.connect(dbpath)
 
 pattern = re.compile(r"(?<!^)(?=[A-Z])")
 
@@ -25,7 +26,7 @@ indata = {
 }
 
 
-con = sqlite3.connect(dbpath)
+
 
 def snake_case(name):
     """
