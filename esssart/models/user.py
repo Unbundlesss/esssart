@@ -1,11 +1,12 @@
 from collections import namedtuple
 from .base import Base
 
+
 class User(Base):
-    extra = ["UNIQUE(username)"]
-    fields = ["id INTEGER PRIMARY KEY", "username TEXT", "avatar TEXT"]
+    fields = ["id INTEGER PRIMARY KEY", "username TEXT UNIQUE", "avatar TEXT"]
     table = "user"
     index = ["username on user(username)"]
+
     def __init__(self, con):
         super().__init__(con)
         self.User = namedtuple("User", self.field_names)
@@ -16,14 +17,18 @@ class User(Base):
     #     self.con.commit()
 
     def name_create(self, name):
-        self.add({name:name})
+        self.add({name: name})
 
     def name_avatar(self, name, avatar):
-        self.cur.execute("UPDATE user SET avatar = ? WHERE username = ?", (avatar, name))
+        self.cur.execute(
+            "UPDATE user SET avatar = ? WHERE username = ?", (avatar, name)
+        )
         self.con.commit()
 
     def has_avatar(self, name):
-        cur = self.cur.execute("SELECT username, avatar FROM user WHERE username = ?", (name,))
+        cur = self.cur.execute(
+            "SELECT username, avatar FROM user WHERE username = ?", (name,)
+        )
         if cur.rowcount > 0:
             if cur.fetchOne().avatar != "":
                 return True
@@ -36,6 +41,10 @@ class User(Base):
         if cur.rowcount > 0:
             return True
         return False
+
+    def name_to_id(self, name):
+        cur = self.cur.execute("SELECT id FROM user WHERE username = ?", (name,))
+        return cur.fetchone()
 
     def name_get(self, name):
         return self.get_custom("name", name)

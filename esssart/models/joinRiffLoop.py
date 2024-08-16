@@ -9,12 +9,12 @@ class JoinRiffLoop(BaseM2M):
         "shared_riff_id TEXT",
         "loop_id TEXT",
         "gain REAL",
-        "on BOOLEAN",
+        "is_on BOOLEAN",
         "ordinal INTEGER",
     ]
     foreign_keys = ["shared_riff", "loop"]
     table = "join_riff_loop"
-    index = [f"shared_riff_loop_idx on {table}(shared_riff, loop)"]
+    index = [f"shared_riff_loop_idx on {table}(shared_riff_id, loop_id)"]
 
     def __init__(self, con):
         super().__init__(con)
@@ -42,7 +42,7 @@ class JoinRiffLoop(BaseM2M):
                     "shared_riff_id": riff.id,
                     "loop_id": loop.id,
                     "gain": loop.gain,
-                    "on": loop.on,
+                    "is_on": loop.on,
                     "ordinal": loop.ordinal,
                 }
             )

@@ -7,11 +7,11 @@ class BaseM2M(Base):
     table = None
 
     def __init__(self, con):
+        super().__init__(con)
         if self.foreign_keys:
             extra = [f"FOREIGN KEY({k}_id) REFERENCES {k}(id)" for k in self.foreign_keys]
-            self.extra = self.extra + extra
+            self.extra = extra
 
-        super().__init__(con)
 
     def join(self, table1, table_id1, table2, table_id2, data={}):
         cur = self.cursor()

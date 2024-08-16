@@ -3,6 +3,7 @@ from prompt_toolkit.formatted_text import HTML
 from ..decorators import handle_params
 from abc import ABC, abstractmethod
 
+
 @ptrepr_to_repr
 class Base(ABC):
     table = None
@@ -25,15 +26,9 @@ Fields: {fields}\n"""
     def __init__(self, con):
         self.con = con
         self.cur = con.cursor()
-        if self.extra:
-            extras = ", ".join(self.extra) + ", "
-        else:
-            extras = ""
-
         if not self.schema:
             self.schema = f"""CREATE TABLE {self.table} (
-                {', '.join(self.fields)}
-                {extras})"""
+                {', '.join(self.fields)})"""
 
         self.field_names = self.get_field_names(self.fields)
 
@@ -98,7 +93,7 @@ Fields: {fields}\n"""
         cur = self.cur
         cur.execute(
             f"SELECT * FROM {self.table} WHERE id IN ({','.join('?' for _ in ids)})",
-            (ids,)
+            (ids,),
         )
         return [self.tuple(*row) for row in cur.fetchall()]
 
@@ -120,9 +115,7 @@ Fields: {fields}\n"""
         return []
 
     def name_create_many(self, users):
-        self.cur.executemany(
-            "INSERT OR IGNORE INTO user (username) VALUES (?)", users
-        )
+        self.cur.executemany("INSERT OR IGNORE INTO user (username) VALUES (?)", users)
         self.con.commit()
 
     def get_custom(self, param, value, asdict=False):
@@ -137,12 +130,20 @@ Fields: {fields}\n"""
             return self.tuple(*row)
 
     def get_schema(self):
-        extra = f" " + ", ".join(self.extra) if self.extra else ""
+        schema = self.schema
+        # add the extra statements.
+        # We have to cram it before the closing parens
+        # of the schema definition
+        if self.extra:
+            extra = ", ".join(self.extra)
+            schema = schema.replace(")", f", {extra})", 1)
+
+        # indexes are separate statements
         if self.index:
             index = [f"CREATE INDEX {index};" for index in self.index]
-            return [f"""{self.schema}{extra}""", *index]
-        else:
-            return [f"""{self.schema}{extra}"""]
+            return [f"""{schema}""", *index]
+
+        return [f"""{schema}"""]
 
     def update(self, id, **kwargs):
         if not self.whitelist(kwargs.keys()):
@@ -168,11 +169,18 @@ Fields: {fields}\n"""
         self.con.commit()
 
     def init(self):
+        table_name = self.table
+        self.app.cur.execute(
+            f"SELECT name FROM sqlite_master WHERE type='table' AND name='{table_name}'"
+        )
+        if self.app.cur.fetchone():
+            print(f"Table {table_name} already exists. Ignoring.")
+            return
         cmds = self.get_schema()
         for cmd in cmds:
             try:
                 self.cur.execute(cmd)
             except Exception as e:
-                print(f"Error: {e}")
+                print(f"Error from init {table_name}: \n{cmd}\n{e}")
                 continue
             self.con.commit()

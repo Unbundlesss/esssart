@@ -8,24 +8,22 @@ from .models import SharedRiff, Loop, User, JoinRiffLoop, Attachment
 import re
 from .vault import Vault
 
-dbpath = "data/app/esssart.database.app"
+dbpath = "data/db/esssart.database.2.db"
 os.makedirs(os.path.dirname(dbpath), exist_ok=True)
 is_new = True if not os.path.exists(dbpath) else False
 con = sqlite3.connect(dbpath)
-
+con.execute("PRAGMA foreign_keys = ON")
 pattern = re.compile(r"(?<!^)(?=[A-Z])")
 
 indata = {
     "json": "data/json",
-    "app": "data/app",
+    "db": "data/db",
     "avatar": "data/image/avatar",
     "cover": "data/image/cover",
     "banner": "data/image/banner",
     "stem": "data/attachment/stem",
     "temp": ".temp",
 }
-
-
 
 
 def snake_case(name):
@@ -55,8 +53,16 @@ class DbConnect(NamedTuple):
     vault: Vault
     con: Connection
     cur: Cursor
+
     def get(self, name):
         return self.__dict__[name]
+
+    def init_all(self):
+        self.shared_riff.init()
+        self.loop.init()
+        self.attachment.init()
+        self.join_riff_loop.init()
+        self.user.init()
 
 
 model_instances = {snake_case(cls.__name__): cls(con) for cls in model_classes}
@@ -70,6 +76,7 @@ app = DbConnect(*instances.values())
 
 # make app available to models
 Base.set_app(app)
+
 
 # idempotent
 def create_table_if_not_exists(model):
@@ -89,12 +96,6 @@ def create_table_if_not_exists(model):
     if not app.cur.fetchone():
         model.init()
 
-
-def init_all():
-    app.shared_riff.init()
-    app.loop.init()
-    app.attachment.init()
-    app.join_riff_loop.init()
 
 # idempotent
 

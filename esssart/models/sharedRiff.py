@@ -1,4 +1,3 @@
-import sqlite3
 import json
 from collections import namedtuple
 
@@ -23,7 +22,7 @@ class RifffDoc:
                 'user TEXT',
               ]
     field_names = [field.split()[0] for field in fields]
-    foreigns = 'FOREIGN KEY(creator_id) REFERENCES user(_id)'
+    foreigns = 'FOREIGN KEY(creator_id) REFERENCES user(id)'
     # field names and foreigns
     schema = f"CREATE TABLE shared_riff ({', '.join(fields)}), {foreigns}"
 

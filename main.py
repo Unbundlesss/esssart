@@ -3,11 +3,12 @@ import sys
 from ptpython.ipython import embed
 
 from esssart import app
+from esssart import RiffObject
 
 # from esssart.sources import pull_sources_list, seed_db
 # from esssart.avatars import avatars
 # from esssart.riff_pics import request_riffs, request_liked_riffs
-
+#
 
 def main(argsv):
     parser = argparse.ArgumentParser(description="run command.")
@@ -43,6 +44,12 @@ def main(argsv):
 
     if args.cmd == "cli":
         embed()
+
+    if args.cmd == "init":
+        app.init_all()
+
+    if args.cmd == "digest":
+        app.init_all()
 
 
 if __name__ == "__main__":

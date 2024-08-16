@@ -18,7 +18,7 @@ class Attachment(Base):
         "url TEXT",
         "local TEXT",
     ]
-    extra = ["unique(key)"]
+
     index = ["attachment_key ON attachment(key)"]
     table = "attachment"
 

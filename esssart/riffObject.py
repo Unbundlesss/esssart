@@ -30,7 +30,7 @@ class RiffObject:
         loop_states = map(
             lambda x: dict(
                 gain=x.get('slot', {}).get('current', {}).get('gain', 1),
-                on=x.get('slot', {}).get('current', {}).get('on', True)
+                is_on=x.get('slot', {}).get('current', {}).get('on', True)
             ),
             dct.get('state', {}).get('playback', [])
         )

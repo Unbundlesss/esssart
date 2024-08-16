@@ -38,9 +38,9 @@ class SharedRiff(Base):
         "sent_by TEXT",
         "title TEXT",
         "type TEXT",
-        "user TEXT"
+        "user TEXT",
         'comment_count INTEGER',
-        'comments TEXT',
+        'comments TEXT'
     ]
     index = [
         "shared_riff_id_user_id ON shared_riff(id, user_id)",
