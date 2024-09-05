@@ -53,13 +53,16 @@ Fields: {fields}\n"""
         return self.tuple(*row)
 
     @handle_params
-    def add(self, _=None, *args, **qdict):
+    def add(self, qdict):
         qlist = qdict.keys()
         columns = ", ".join(qlist)
         placeholders = ", ".join("?" for _ in qdict)
         values = tuple(qdict.values())
+        sql = f"INSERT INTO {self.table} ({columns}) VALUES ({placeholders})"
+        print(sql)
+        print(values)
         self.cur.execute(
-            f"INSERT INTO {self.table} ({columns}) VALUES ({placeholders})", values
+           sql , values
         )
         self.con.commit()
 
@@ -124,6 +127,8 @@ Fields: {fields}\n"""
         values = (value,)
         cur.execute(f"SELECT * from {self.table} WHERE {param} = ?", values)
         row = cur.fetchone()
+        if not row:
+            return None
         if asdict:
             return dict(zip(self.field_names, row))
         else:
@@ -167,6 +172,12 @@ Fields: {fields}\n"""
 
         self.cur.execute(f"DELETE FROM {self.table} WHERE id = ?", (id,))
         self.con.commit()
+
+    def get_by_id(self, id):
+        res = self.get_custom("id", id)
+        if res is None:
+            raise ValueError(f"Record with id {id} not found")
+        return res
 
     def init(self):
         table_name = self.table

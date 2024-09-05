@@ -1,7 +1,7 @@
 import argparse
 import sys
 from ptpython.ipython import embed
-
+import json
 from esssart import app
 from esssart import RiffObject
 
@@ -50,6 +50,12 @@ def main(argsv):
 
     if args.cmd == "digest":
         app.init_all()
+        with open(args.file, "r") as f:
+            data = f.read()
+            rawriff= json.loads(data)
+            riff = RiffObject(data)
+            riff.build_riff()
+            embed()
 
 
 if __name__ == "__main__":

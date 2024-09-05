@@ -37,6 +37,14 @@ class Attachment(Base):
         self.add(att)
         return self.get_last()
 
+    def get_by_key(self, key):
+        self.cur.execute(f"SELECT * FROM {self.table} WHERE key = ?", (key,))
+        row = self.cur.fetchone()
+        if row:
+            return self.tuple(*row)
+        else:
+            raise ValueError(f"Attachment not found: {key}")
+
     def update_local(self, local, key):
         self.cur.execute(
             f"UPDATE {self.table} SET local = ? WHERE key = ?", (local, key)
