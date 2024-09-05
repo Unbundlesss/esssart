@@ -40,7 +40,8 @@ class SharedRiff(Base):
         "type TEXT",
         "user TEXT",
         'comment_count INTEGER',
-        'comments TEXT'
+        'comments TEXT',
+        "jam_id TEXT",
     ]
     index = [
         "shared_riff_id_user_id ON shared_riff(id, user_id)",
