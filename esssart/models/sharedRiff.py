@@ -72,7 +72,7 @@ class RifffDoc:
                 image_url TEXT,
                 image BOOLEAN,
                 creator_id INTEGER,
-                FOREIGN KEY(creator_id) REFERENCES user(_id)
+                FOREIGN KEY(creator_id) REFERENCES user(id)
             )
         """
         )
@@ -93,7 +93,7 @@ class RifffDoc:
         cursor.execute(
             """
             CREATE TABLE IF NOT EXISTS loops (
-                _id TEXT PRIMARY KEY,
+                id TEXT PRIMARY KEY,
                 cdn_attachments TEXT,
                 isNote BOOLEAN,
                 primaryColour TEXT,
@@ -156,14 +156,14 @@ class RifffDoc:
             cursor.execute(
                 """
                 INSERT OR REPLACE INTO loops (
-                    _id, cdn_attachments, isNote, primaryColour, bps, app_version,
+                    id, cdn_attachments, isNote, primaryColour, bps, app_version,
                     isMic, bufferURL, colourHistory, isDrum, length16ths, originalPitch,
                     creatorUserName, type, length, presetName, bufferPath, isBass, sampleRate,
                     barLength, created, 
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
                 (
-                    loop["_id"],
+                    loop["id"],
                     json.dumps(loop["cdn_attachments"]),
                     loop.get("isNote", False),
                     loop.get("primaryColour"),
@@ -197,7 +197,7 @@ class RifffDoc:
             """,
                 (
                     self.doc_id,
-                    loop["_id"],
+                    loop["id"],
                     playback_cleaned["on"],
                     playback_cleaned["gain"],
                 ),

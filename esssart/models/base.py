@@ -1,7 +1,7 @@
 from ptpython.utils import ptrepr_to_repr
 from prompt_toolkit.formatted_text import HTML
 from ..decorators import handle_params
-from abc import ABC, abstractmethod
+from abc import ABC
 
 
 @ptrepr_to_repr

@@ -39,7 +39,7 @@ class RiffObject:
         loop_mains = list(
             map(
                 lambda x: dict(
-                    id=x.get("_id"),
+                    id=x.get("id"),
                     app_version=x.get("app_version"),
                     audio_attachment_id=None,
                     audio_attachment=RiffObject.key_to_type(x.get("cdn_attachments")),
@@ -176,32 +176,22 @@ class RiffObject:
     def build_riff(self):
         # make image
         fields = {i: self.__dict__.get(i) for i in app.shared_riff.get_fields()}
-        isnew = False
 
         try:
             db_riff = app.shared_riff.get_by_id(self.get("id"))
         except ValueError:
-            isnew = True
-
-
-        image = self.get_image()
-
-        loops = self.get_loops()
-
-        db_riff.image_attachment = image
-
-
-
-        # join loops using join_riff_loop
-        app.join_riff_loop.join_loops_to_riff(db_riff, loops)
-        db_riff.loops = loops
-
-        if isnew:
             _data = dict()
             for i in fields:
                 _data[i] = self.get(i)
             db_riff = app.shared_riff.add(_data)
 
+        image = self.get_image()
+        loops = self.get_loops()
+        db_riff.image_attachment = image
+
+        # join loops using join_riff_loop
+        app.join_riff_loop.join_loops_to_riff(db_riff, loops)
+        db_riff.loops = loops
 
 
     def get_image(self):

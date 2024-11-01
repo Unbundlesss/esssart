@@ -15,7 +15,7 @@ class TestBaseWithMockModel(unittest.TestCase):
         self.assertEqual(result, ("some_id", "test_name", 123))
 
     def test_add(self):
-        self.mock_model.add(id="some_id", name="test_name", value=123)
+        self.mock_model.add({"id": "some_id", "name": "test_name", "value": 123})
         self.mock_db.cursor().execute.assert_called_with(
             "INSERT INTO mock_table (id, name, value) VALUES (?, ?, ?)",
             ("some_id", "test_name", 123),
@@ -32,7 +32,7 @@ class TestBaseWithMockModel(unittest.TestCase):
             self.mock_model.colcheck("invalid_column")
 
     def test_update(self):
-        self.mock_model.update(id="some_id", name="updated_name", value=456)
+        self.mock_model.update("some_id", name="updated_name", value=456)
         self.mock_db.cursor().execute.assert_called_with(
             "UPDATE mock_table SET name = ?, value = ? WHERE id = ?",
             ("updated_name", 456, "some_id"),
@@ -57,4 +57,3 @@ class TestBaseWithMockModel(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-
